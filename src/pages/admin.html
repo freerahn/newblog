@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Blog Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .prose-editor {
+      min-height: 400px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div class="min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex justify-between items-center">
+          <h1 class="text-2xl font-bold text-gray-900">Blog Admin</h1>
+          <nav>
+            <a href="/" class="text-gray-600 hover:text-gray-900 px-3 py-2">← Back to Blog</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Tabs -->
+      <div class="mb-6 border-b border-gray-200">
+        <nav class="flex space-x-8">
+          <button id="tab-list" class="py-4 px-1 border-b-2 border-blue-500 font-medium text-sm text-blue-600">
+            글 목록
+          </button>
+          <button id="tab-create" class="py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300">
+            새 글 작성
+          </button>
+        </nav>
+      </div>
+
+      <!-- List View -->
+      <div id="view-list" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-900">게시글 목록</h2>
+            <div class="flex gap-2">
+              <input 
+                type="text" 
+                id="search-input"
+                placeholder="검색..." 
+                class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button 
+                id="refresh-btn"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                새로고침
+              </button>
+            </div>
+          </div>
+          <div id="posts-list" class="space-y-2">
+            <p class="text-gray-500 text-center py-8">로딩 중...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create/Edit View -->
+      <div id="view-edit" class="hidden">
+        <form id="post-form" class="bg-white rounded-lg shadow-sm p-6 space-y-6">
+          <div>
+            <label for="post-title" class="block text-sm font-medium text-gray-700 mb-2">
+              제목 *
+            </label>
+            <input 
+              type="text" 
+              id="post-title" 
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="post-slug" class="block text-sm font-medium text-gray-700 mb-2">
+                Slug * (URL 경로)
+              </label>
+              <input 
+                type="text" 
+                id="post-slug" 
+                required
+                pattern="[a-z0-9-]+"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <p class="text-xs text-gray-500 mt-1">소문자, 숫자, 하이픈만 사용 가능</p>
+            </div>
+
+            <div>
+              <label for="post-date" class="block text-sm font-medium text-gray-700 mb-2">
+                날짜 *
+              </label>
+              <input 
+                type="date" 
+                id="post-date" 
+                required
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label for="post-tags" class="block text-sm font-medium text-gray-700 mb-2">
+              태그 (쉼표로 구분)
+            </label>
+            <input 
+              type="text" 
+              id="post-tags" 
+              placeholder="예: javascript, astro, blog"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label for="post-summary" class="block text-sm font-medium text-gray-700 mb-2">
+              요약
+            </label>
+            <textarea 
+              id="post-summary" 
+              rows="2"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            ></textarea>
+          </div>
+
+          <div class="flex items-center">
+            <input 
+              type="checkbox" 
+              id="post-draft" 
+              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label for="post-draft" class="ml-2 block text-sm text-gray-700">
+              초안으로 저장 (게시 목록에 표시되지 않음)
+            </label>
+          </div>
+
+          <div>
+            <label for="post-content" class="block text-sm font-medium text-gray-700 mb-2">
+              본문 (Markdown) *
+            </label>
+            <textarea 
+              id="post-content" 
+              required
+              rows="20"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg prose-editor focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Markdown 형식으로 작성하세요..."
+            ></textarea>
+          </div>
+
+          <div class="flex gap-4">
+            <button 
+              type="submit" 
+              id="save-btn"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              저장
+            </button>
+            <button 
+              type="button" 
+              id="cancel-btn"
+              class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+            >
+              취소
+            </button>
+            <button 
+              type="button" 
+              id="delete-btn"
+              class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors hidden"
+            >
+              삭제
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    // API 엔드포인트 (Cloudflare Function)
+    const API_BASE = '/api/github';
+
+    let currentEditingSlug = null;
+    let allPosts = [];
+
+    // 탭 전환
+    document.getElementById('tab-list').addEventListener('click', () => {
+      showListView();
+    });
+
+    document.getElementById('tab-create').addEventListener('click', () => {
+      showEditView();
+      resetForm();
+    });
+
+    // 검색
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      filterPosts(e.target.value);
+    });
+
+    // 새로고침
+    document.getElementById('refresh-btn').addEventListener('click', () => {
+      loadPosts();
+    });
+
+    // 폼 제출
+    document.getElementById('post-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await savePost();
+    });
+
+    // 취소
+    document.getElementById('cancel-btn').addEventListener('click', () => {
+      showListView();
+      resetForm();
+    });
+
+    // 삭제
+    document.getElementById('delete-btn').addEventListener('click', async () => {
+      if (confirm('정말 이 글을 삭제하시겠습니까?')) {
+        await deletePost();
+      }
+    });
+
+    function showListView() {
+      document.getElementById('view-list').classList.remove('hidden');
+      document.getElementById('view-edit').classList.add('hidden');
+      document.getElementById('tab-list').classList.add('border-blue-500', 'text-blue-600');
+      document.getElementById('tab-list').classList.remove('border-transparent', 'text-gray-500');
+      document.getElementById('tab-create').classList.remove('border-blue-500', 'text-blue-600');
+      document.getElementById('tab-create').classList.add('border-transparent', 'text-gray-500');
+    }
+
+    function showEditView() {
+      document.getElementById('view-list').classList.add('hidden');
+      document.getElementById('view-edit').classList.remove('hidden');
+      document.getElementById('tab-create').classList.add('border-blue-500', 'text-blue-600');
+      document.getElementById('tab-create').classList.remove('border-transparent', 'text-gray-500');
+      document.getElementById('tab-list').classList.remove('border-blue-500', 'text-blue-600');
+      document.getElementById('tab-list').classList.add('border-transparent', 'text-gray-500');
+    }
+
+    function resetForm() {
+      currentEditingSlug = null;
+      document.getElementById('post-form').reset();
+      document.getElementById('post-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('delete-btn').classList.add('hidden');
+      document.getElementById('save-btn').textContent = '저장';
+    }
+
+    async function loadPosts() {
+      try {
+        const response = await fetch(`${API_BASE}/list`);
+        if (!response.ok) throw new Error('Failed to load posts');
+        
+        const data = await response.json();
+        allPosts = data.posts || [];
+        renderPosts(allPosts);
+      } catch (error) {
+        console.error('Error loading posts:', error);
+        document.getElementById('posts-list').innerHTML = 
+          '<p class="text-red-500 text-center py-8">게시글을 불러오는데 실패했습니다.</p>';
+      }
+    }
+
+    function renderPosts(posts) {
+      const container = document.getElementById('posts-list');
+      
+      if (posts.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-8">게시글이 없습니다.</p>';
+        return;
+      }
+
+      container.innerHTML = posts.map(post => `
+        <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+          <div class="flex justify-between items-start">
+            <div class="flex-1">
+              <h3 class="font-semibold text-gray-900 mb-1">${post.title}</h3>
+              <p class="text-sm text-gray-600 mb-2">${post.summary || '요약 없음'}</p>
+              <div class="flex gap-4 text-xs text-gray-500">
+                <span>Slug: ${post.slug}</span>
+                <span>Date: ${post.date}</span>
+                ${post.draft ? '<span class="text-orange-600">초안</span>' : ''}
+              </div>
+            </div>
+            <button 
+              onclick="editPost('${post.slug}')" 
+              class="ml-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              수정
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterPosts(query) {
+      const filtered = allPosts.filter(post => 
+        post.title.toLowerCase().includes(query.toLowerCase()) ||
+        post.summary?.toLowerCase().includes(query.toLowerCase()) ||
+        post.slug.toLowerCase().includes(query.toLowerCase())
+      );
+      renderPosts(filtered);
+    }
+
+    window.editPost = async function(slug) {
+      try {
+        const response = await fetch(`${API_BASE}/get?slug=${slug}`);
+        if (!response.ok) throw new Error('Failed to load post');
+        
+        const post = await response.json();
+        currentEditingSlug = slug;
+        
+        document.getElementById('post-title').value = post.title || '';
+        document.getElementById('post-slug').value = post.slug || '';
+        document.getElementById('post-date').value = post.date || '';
+        document.getElementById('post-tags').value = (post.tags || []).join(', ');
+        document.getElementById('post-summary').value = post.summary || '';
+        document.getElementById('post-draft').checked = post.draft || false;
+        document.getElementById('post-content').value = post.content || '';
+        
+        document.getElementById('delete-btn').classList.remove('hidden');
+        document.getElementById('save-btn').textContent = '수정';
+        
+        showEditView();
+      } catch (error) {
+        console.error('Error loading post:', error);
+        alert('게시글을 불러오는데 실패했습니다.');
+      }
+    };
+
+    async function savePost() {
+      const title = document.getElementById('post-title').value.trim();
+      const slug = document.getElementById('post-slug').value.trim();
+      const date = document.getElementById('post-date').value;
+      const tags = document.getElementById('post-tags').value.split(',').map(t => t.trim()).filter(t => t);
+      const summary = document.getElementById('post-summary').value.trim();
+      const draft = document.getElementById('post-draft').checked;
+      const content = document.getElementById('post-content').value.trim();
+
+      if (!title || !slug || !date || !content) {
+        alert('필수 항목을 모두 입력해주세요.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slug,
+            title,
+            date,
+            tags,
+            summary,
+            draft,
+            content,
+            existingSlug: currentEditingSlug, // 수정 시 기존 slug
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to save post');
+        }
+
+        alert('저장되었습니다! (배포 후 반영됩니다)');
+        showListView();
+        resetForm();
+        loadPosts();
+      } catch (error) {
+        console.error('Error saving post:', error);
+        alert(`저장 실패: ${error.message}`);
+      }
+    }
+
+    async function deletePost() {
+      if (!currentEditingSlug) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/delete`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: currentEditingSlug }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to delete post');
+        }
+
+        alert('삭제되었습니다! (배포 후 반영됩니다)');
+        showListView();
+        resetForm();
+        loadPosts();
+      } catch (error) {
+        console.error('Error deleting post:', error);
+        alert(`삭제 실패: ${error.message}`);
+      }
+    }
+
+    // 초기 로드
+    loadPosts();
+  </script>
+</body>
+</html>
+

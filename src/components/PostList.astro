@@ -1,0 +1,43 @@
+---
+import type { Post } from '../types';
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+---
+
+<div class="space-y-6">
+  {posts.map(post => (
+    <article class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
+      <a href={`/${post.frontmatter.slug}`} class="block">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2 hover:text-blue-600 transition-colors">
+          {post.frontmatter.title}
+        </h2>
+        {post.frontmatter.summary && (
+          <p class="text-gray-600 mb-4">{post.frontmatter.summary}</p>
+        )}
+        <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+          <time datetime={post.frontmatter.date}>
+            {new Date(post.frontmatter.date).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </time>
+          {post.frontmatter.tags && post.frontmatter.tags.length > 0 && (
+            <div class="flex gap-2">
+              {post.frontmatter.tags.map(tag => (
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </a>
+    </article>
+  ))}
+</div>
+

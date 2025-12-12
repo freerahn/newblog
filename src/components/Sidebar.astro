@@ -1,0 +1,33 @@
+---
+import type { Post } from '../types';
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+---
+
+<aside class="bg-white rounded-lg shadow-sm p-6">
+  <h2 class="text-xl font-bold text-gray-900 mb-4">최신글</h2>
+  <ul class="space-y-3">
+    {posts.map(post => (
+      <li>
+        <a 
+          href={`/${post.frontmatter.slug}`}
+          class="block text-gray-700 hover:text-gray-900 hover:underline transition-colors"
+        >
+          <div class="font-medium">{post.frontmatter.title}</div>
+          <div class="text-sm text-gray-500 mt-1">
+            {new Date(post.frontmatter.date).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            })}
+          </div>
+        </a>
+      </li>
+    ))}
+  </ul>
+</aside>
+

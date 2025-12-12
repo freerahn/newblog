@@ -1,0 +1,34 @@
+---
+import { getAllPosts } from '../utils/posts';
+import { siteConfig } from '../config';
+
+const posts = getAllPosts().slice(0, 20); // 최신 20개만
+const siteUrl = siteConfig.url;
+
+const rss = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>${siteConfig.title}</title>
+    <link>${siteUrl}</link>
+    <description>${siteConfig.description}</description>
+    <language>${siteConfig.language}</language>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+    <atom:link href="${siteUrl}/rss.xml" rel="self" type="application/rss+xml"/>
+    ${posts.map(post => `
+    <item>
+      <title>${post.frontmatter.title}</title>
+      <link>${siteUrl}/${post.frontmatter.slug}</link>
+      <description>${post.frontmatter.summary || post.frontmatter.title}</description>
+      <pubDate>${new Date(post.frontmatter.date).toUTCString()}</pubDate>
+      <guid>${siteUrl}/${post.frontmatter.slug}</guid>
+    </item>`).join('')}
+  </channel>
+</rss>`;
+---
+
+return new Response(rss, {
+  headers: {
+    'Content-Type': 'application/rss+xml',
+  },
+});
+

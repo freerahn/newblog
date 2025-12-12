@@ -1,0 +1,78 @@
+---
+import { getAllPosts } from '../utils/posts';
+import PostList from '../components/PostList.astro';
+import { siteConfig } from '../config';
+
+const posts = getAllPosts();
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={siteConfig.description} />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={siteConfig.title} />
+    <meta property="og:description" content={siteConfig.description} />
+    <meta property="og:url" content={siteConfig.url} />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content={siteConfig.title} />
+    <meta property="twitter:description" content={siteConfig.description} />
+    
+    <title>{siteConfig.title}</title>
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body class="bg-gray-50 text-gray-900">
+    <div class="min-h-screen">
+      <!-- Header -->
+      <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div class="flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-gray-900 hover:text-gray-700">
+              {siteConfig.title}
+            </a>
+            <nav>
+              <a href="/" class="text-gray-600 hover:text-gray-900 px-3 py-2">Home</a>
+              <a href="/admin.html" class="text-gray-600 hover:text-gray-900 px-3 py-2">Admin</a>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="mb-12">
+          <h1 class="text-5xl font-bold text-gray-900 mb-4">
+            {siteConfig.title}
+          </h1>
+          <p class="text-xl text-gray-600">
+            {siteConfig.description}
+          </p>
+        </div>
+
+        {posts.length > 0 ? (
+          <PostList posts={posts} />
+        ) : (
+          <div class="bg-white rounded-lg shadow-sm p-12 text-center">
+            <p class="text-gray-600 text-lg">아직 게시글이 없습니다.</p>
+          </div>
+        )}
+      </main>
+
+      <!-- Footer -->
+      <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <p class="text-center text-gray-600 text-sm">
+            © {new Date().getFullYear()} {siteConfig.title}. All rights reserved.
+          </p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
+

@@ -1,0 +1,24 @@
+---
+import { getPostBySlug, getPostModuleBySlug } from '../utils/posts';
+import PostLayout from '../layouts/PostLayout.astro';
+
+const { slug } = Astro.params;
+const post = slug ? getPostBySlug(slug) : null;
+
+if (!post) {
+  return Astro.redirect('/404');
+}
+
+// 해당 slug의 모듈 가져오기
+const postModule = getPostModuleBySlug(slug!);
+if (!postModule) {
+  return Astro.redirect('/404');
+}
+
+const { Content } = postModule;
+---
+
+<PostLayout post={post}>
+  <Content />
+</PostLayout>
+
