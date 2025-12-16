@@ -1,6 +1,14 @@
 ---
-import { getPostBySlug, getPostModuleBySlug } from '../utils/posts';
+import { getAllPosts, getPostBySlug, getPostModuleBySlug } from '../utils/posts';
 import PostLayout from '../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = getAllPosts();
+  return posts.map((post) => ({
+    params: { slug: post.frontmatter.slug },
+    props: { post },
+  }));
+}
 
 const { slug } = Astro.params;
 const post = slug ? getPostBySlug(slug) : null;
