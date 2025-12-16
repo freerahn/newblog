@@ -93,3 +93,4 @@ Cloudflare Pages 환경변수:
 - `GITHUB_REPO`: 저장소 이름
 - `GITHUB_BRANCH`: 기본 브랜치 (기본값: `main`)
 
+

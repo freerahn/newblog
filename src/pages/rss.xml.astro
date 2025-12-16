@@ -16,19 +16,28 @@ const rss = `<?xml version="1.0" encoding="UTF-8"?>
     <atom:link href="${siteUrl}/rss.xml" rel="self" type="application/rss+xml"/>
     ${posts.map(post => `
     <item>
-      <title>${post.frontmatter.title}</title>
+      <title>${escapeXml(post.frontmatter.title)}</title>
       <link>${siteUrl}/${post.frontmatter.slug}</link>
-      <description>${post.frontmatter.summary || post.frontmatter.title}</description>
+      <description>${escapeXml(post.frontmatter.summary || post.frontmatter.title)}</description>
       <pubDate>${new Date(post.frontmatter.date).toUTCString()}</pubDate>
       <guid>${siteUrl}/${post.frontmatter.slug}</guid>
     </item>`).join('')}
   </channel>
 </rss>`;
+
+function escapeXml(unsafe: string): string {
+  return unsafe.replace(/[<>&'"]/g, (c) => {
+    switch (c) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case '\'': return '&apos;';
+      case '"': return '&quot;';
+      default: return c;
+    }
+  });
+}
 ---
 
-return new Response(rss, {
-  headers: {
-    'Content-Type': 'application/rss+xml',
-  },
-});
+{rss}
 
